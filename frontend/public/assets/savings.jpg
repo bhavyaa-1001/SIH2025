@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="400" viewBox="0 0 800 400">
+  <rect width="800" height="400" fill="#3f51b5" />
+  <g transform="translate(400, 200)">
+    <rect x="-150" y="-100" width="300" height="200" rx="20" ry="20" fill="white" opacity="0.9" />
+    <g transform="translate(0, -50)">
+      <circle cx="0" cy="0" r="50" fill="#4caf50" />
+      <text x="0" y="5" font-family="Arial" font-size="40" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">$</text>
+    </g>
+    <g transform="translate(0, 30)">
+      <rect x="-100" y="-10" width="200" height="10" rx="5" ry="5" fill="#e0e0e0" />
+      <rect x="-100" y="10" width="150" height="10" rx="5" ry="5" fill="#e0e0e0" />
+      <rect x="-100" y="30" width="180" height="10" rx="5" ry="5" fill="#e0e0e0" />
+    </g>
+  </g>
+  <g transform="translate(150, 300)">
+    <circle cx="0" cy="0" r="70" fill="white" opacity="0.2" />
+  </g>
+  <g transform="translate(650, 100)">
+    <circle cx="0" cy="0" r="50" fill="white" opacity="0.2" />
+  </g>
+  <g transform="translate(250, 50)">
+    <circle cx="0" cy="0" r="30" fill="white" opacity="0.2" />
+  </g>
+</svg>

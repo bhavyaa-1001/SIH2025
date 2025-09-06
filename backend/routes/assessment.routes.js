@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { protect } = require('../middleware/auth.middleware');
+const { protect } = require('../middleware/authMiddleware');
 const multer = require('multer');
 const path = require('path');
 
@@ -14,7 +14,8 @@ const {
   analyzeRoof,
   calculateInfiltrationRate,
   calculateRechargePotential,
-  checkCompliance
+  checkCompliance,
+  generateReport
 } = require('../controllers/assessment.controller');
 
 // Configure multer for file uploads

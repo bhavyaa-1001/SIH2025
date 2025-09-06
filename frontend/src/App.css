@@ -1,21 +1,67 @@
+/* Import auth styles */
+@import './styles/auth.css';
+
+:root {
+  /* Light mode variables */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-card: #ffffff;
+  --bg-input: #ffffff;
+  --text-primary: #333333;
+  --text-secondary: #6c757d;
+  --border-color: #dee2e6;
+  --primary-color: #0d6efd;
+  --primary-color-dark: #0a58ca;
+  --error-color: #dc3545;
+  --error-bg: #f8d7da;
+  --success-color: #198754;
+  --success-bg: #d1e7dd;
+  --disabled-color: #6c757d;
+}
+
+.dark-mode {
+  /* Dark mode variables */
+  --bg-primary: #121212;
+  --bg-secondary: #1e1e1e;
+  --bg-card: #242424;
+  --bg-card-dark: #2d2d2d;
+  --bg-input: #333333;
+  --bg-input-dark: #3a3a3a;
+  --text-primary: #e0e0e0;
+  --text-secondary: #adb5bd;
+  --border-color: #444444;
+  --border-color-dark: #555555;
+  --primary-color: #3d8bfd;
+  --primary-color-dark: #0d6efd;
+  --error-color: #e05260;
+  --error-bg: #3b2427;
+  --success-color: #4dd4ac;
+  --success-bg: #1c3832;
+  --disabled-color: #6c757d;
+}
+
 #root {
-  max-width: 1280px;
+  width: 100%;
   margin: 0 auto;
-  padding: 2rem;
   text-align: center;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
 }
 
 .logo {
   height: 6em;
   padding: 1.5em;
   will-change: filter;
-  transition: filter 300ms;
+  transition: filter 300ms, transform 300ms;
 }
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
+  transform: scale(1.05);
 }
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
+  transform: scale(1.05);
 }
 
 @keyframes logo-spin {
@@ -25,6 +71,56 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Global animations */
+.fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.slide-in {
+  animation: slideIn 0.5s ease-in-out;
+}
+
+.scale-in {
+  animation: scaleIn 0.5s ease-in-out;
+}
+
+.pulse {
+  animation: pulse 2s infinite ease-in-out;
+}
+
+/* Animation keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* Dark mode specific styles */
+.dark .card {
+  background-color: #1e1e1e;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.dark .button {
+  background-color: #90caf9;
+  color: #121212;
 }
 
 @media (prefers-reduced-motion: no-preference) {

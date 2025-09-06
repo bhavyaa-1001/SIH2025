@@ -5,11 +5,12 @@ const path = require('path');
 const tf = require('@tensorflow/tfjs');
 const sharp = require('sharp');
 const { OpenAI } = require('@langchain/openai');
-const { RetrievalQAChain } = require('langchain/chains');
-const { DirectoryLoader } = require('langchain/document_loaders/fs/directory');
-const { TextLoader } = require('langchain/document_loaders/fs/text');
-const { OpenAIEmbeddings } = require('@langchain/openai');
-const { FaissStore } = require('langchain/vectorstores/faiss');
+// Commenting out langchain imports that are causing issues
+// const { RetrievalQAChain } = require('langchain/chains');
+// const { DirectoryLoader } = require('langchain/document_loaders/fs/directory');
+// const { TextLoader } = require('langchain/document_loaders/fs/text');
+// const { OpenAIEmbeddings } = require('@langchain/openai');
+// const { FaissStore } = require('langchain/vectorstores/faiss');
 const MultivariateLinearRegression = require('ml-regression-multivariate-linear');
 
 // Basic CRUD operations
@@ -396,6 +397,44 @@ const checkCompliance = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc    Generate assessment report
+// @route   GET /api/assessments/:id/report
+// @access  Private
+const generateReport = asyncHandler(async (req, res) => {
+  const assessment = await Assessment.findById(req.params.id);
+
+  if (!assessment) {
+    res.status(404);
+    throw new Error('Assessment not found');
+  }
+
+  // Check if the assessment belongs to the logged-in user
+  if (assessment.user.toString() !== req.user._id.toString()) {
+    res.status(401);
+    throw new Error('Not authorized');
+  }
+
+  // Generate a simple report with assessment data
+  const reportData = {
+    assessmentId: assessment._id,
+    location: assessment.location,
+    roofArea: assessment.roofArea,
+    roofMaterial: assessment.roofMaterial,
+    soilType: assessment.soilType,
+    groundwaterLevel: assessment.groundwaterLevel,
+    infiltrationRate: assessment.infiltrationRate || 'Not calculated',
+    rechargePotential: assessment.rechargePotential || 'Not calculated',
+    complianceStatus: assessment.complianceStatus || 'Not evaluated',
+    recommendations: assessment.recommendations || [],
+    generatedDate: new Date().toISOString(),
+  };
+
+  res.status(200).json({
+    success: true,
+    data: reportData,
+  });
+});
+
 // Step 6: Fine-Tuned RLHF-Based LLM (Personalization & Explanation Layer)
 // This would be implemented in the frontend with API calls to OpenAI or similar service
 
@@ -414,5 +453,6 @@ module.exports = {
   analyzeRoof,
   calculateInfiltrationRate,
   calculateRechargePotential,
-  checkCompliance
+  checkCompliance,
+  generateReport
 };

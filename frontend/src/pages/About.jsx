@@ -19,7 +19,8 @@ import {
   Science,
   VerifiedUser,
   BarChart,
-  Lightbulb
+  Lightbulb,
+  Nature
 } from '@mui/icons-material';
 
 const About = () => {
@@ -57,7 +58,7 @@ const About = () => {
               <CardMedia
                 component="img"
                 height="300"
-                image="/assets/images/mission.svg"
+                image="/assets/assessment.jpg"
                 alt="Rainwater harvesting mission"
                 sx={{ objectFit: 'contain', p: 2 }}
               />
@@ -144,7 +145,7 @@ const About = () => {
               <Divider variant="inset" component="li" />
               <ListItem>
                 <ListItemIcon>
-                  <Eco color="primary" />
+                  <Nature color="primary" />
                 </ListItemIcon>
                 <ListItemText 
                   primary="Environmental Impact" 
@@ -168,7 +169,7 @@ const About = () => {
               <CardMedia
                 component="img"
                 height="300"
-                image="/assets/images/benefits.svg"
+                image="/assets/compliance.jpg"
                 alt="Rainwater harvesting benefits"
                 sx={{ objectFit: 'contain', p: 2 }}
               />

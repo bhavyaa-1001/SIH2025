@@ -19,7 +19,7 @@ import {
   CircularProgress,
   Alert
 } from '@mui/material';
-import axios from 'axios';
+import { assessmentService } from '../services/api';
 
 const steps = ['Property Details', 'System Specifications', 'User Preferences'];
 
@@ -130,10 +130,11 @@ const Assessment = () => {
         }
       };
       
-      const response = await axios.post('/api/assessments', payload);
+      // Use the assessmentService instead of direct axios call
+      const response = await assessmentService.createAssessment(payload);
       
       // Navigate to results page with assessment ID
-      navigate(`/results/${response.data.assessmentId}`);
+      navigate(`/results/${response.data._id}`);
     } catch (err) {
       setError(err.response?.data?.error || 'An error occurred while submitting the assessment');
     } finally {
@@ -408,7 +409,7 @@ const Assessment = () => {
   return (
     <Container maxWidth="lg">
       <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4 }}>
-        <Box component="img" src="/assets/images/assessment.svg" alt="Rainwater Harvesting Assessment" sx={{ maxWidth: '100%', height: 'auto', maxHeight: 300 }} />
+        <Box component="img" src="/assets/assessment.jpg" alt="Rainwater Harvesting Assessment" sx={{ maxWidth: '100%', height: 'auto', maxHeight: 300 }} />
       </Box>
       <Paper elevation={3} sx={{ p: 4, mb: 4 }}>
         <Typography variant="h4" component="h1" align="center" gutterBottom>

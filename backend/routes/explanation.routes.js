@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { protect } = require('../middleware/authMiddleware');
 const explanationController = require('../controllers/explanation.controller');
 
 /**
@@ -7,9 +8,9 @@ const explanationController = require('../controllers/explanation.controller');
  */
 
 // Generate personalized explanation based on assessment data
-router.post('/personalize', explanationController.personalizeExplanation);
+router.post('/personalize', protect, explanationController.personalizeExplanation);
 
 // Get explanation history for a user
-router.get('/history/:userId', explanationController.getExplanationHistory);
+router.get('/history/:userId', protect, explanationController.getExplanationHistory);
 
 module.exports = router;
