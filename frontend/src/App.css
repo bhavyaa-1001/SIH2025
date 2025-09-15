@@ -120,7 +120,6 @@
   width: 100%;
   margin: 0 auto;
   text-align: center;
->>>>>>> c2c51176 (.env oth)
   transition: background-color 0.3s ease, color 0.3s ease;
   color: var(--text-primary);
   background-color: var(--bg-primary);
