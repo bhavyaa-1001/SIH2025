@@ -5,27 +5,31 @@ import {
   Box,
   Toolbar,
   Typography,
-  IconButton,
   Badge,
-  Avatar,
   Button,
-  Container,
   Menu,
-  MenuItem
+  MenuItem,
+  Chip
 } from '@mui/material';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import SearchIcon from '@mui/icons-material/Search';
-import LoginIcon from '@mui/icons-material/Login';
-import LogoutIcon from '@mui/icons-material/Logout';
-import WaterDropIcon from '@mui/icons-material/WaterDrop';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import ThemeToggle from '../ThemeToggle';
+// MUI icons removed
+// ThemeToggle removed
 import { AuthContext } from '../../context/AuthContext';
 
 const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = React.useState(null);
+  
+  // Function to format username - remove 29C if present
+  const formatUsername = (user) => {
+    if (!user) return '';
+    
+    // Get username from user object
+    let username = user.name || user.username || user.email?.split('@')[0] || '';
+    
+    // Remove 29C from username if present
+    return username.replace(/29C/g, '').trim();
+  };
   
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -58,7 +62,6 @@ const Navbar = () => {
       }}
     >
       <Toolbar>
-        <WaterDropIcon sx={{ mr: 1 }} />
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           <Box sx={{ display: 'flex', flexDirection: 'column' }}>
             <Typography variant="h5" component={Link} to="/" sx={{ fontWeight: 'bold', textDecoration: 'none', color: 'inherit' }}>
@@ -71,19 +74,57 @@ const Navbar = () => {
         </Typography>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <IconButton color="inherit">
-            <SearchIcon />
-          </IconButton>
+          <Button 
+            color="inherit"
+            aria-label="Search the site"
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                // Add search functionality here
+                console.log('Search button activated via keyboard');
+              }
+            }}
+            onClick={() => {
+              // Add search functionality here
+              console.log('Search button clicked');
+            }}
+          >
+            Search
+          </Button>
           
           {user && (
-            <IconButton color="inherit">
-              <Badge badgeContent={4} color="error">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
+            <>
+              <Button 
+                color="inherit"
+                aria-label="View 4 notifications"
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    // Add notifications functionality here
+                    console.log('Notifications button activated via keyboard');
+                  }
+                }}
+                onClick={() => {
+                  // Add notifications functionality here
+                  console.log('Notifications button clicked');
+                }}
+              >
+                <Badge badgeContent={4} color="error">
+                  Notifications
+                </Badge>
+              </Button>
+              <Chip
+                label={formatUsername(user)}
+                color="primary"
+                variant="outlined"
+                size="medium"
+                sx={{ ml: 1 }}
+                avatar={<Box component="span" sx={{ width: 32, height: 32, borderRadius: '50%', bgcolor: 'primary.main', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{formatUsername(user).charAt(0).toUpperCase()}</Box>}
+              />
+            </>
           )}
-          
-          <ThemeToggle />
           
           {user ? (
             <Button 
@@ -92,7 +133,6 @@ const Navbar = () => {
                 logout();
                 navigate('/login');
               }}
-              startIcon={<LogoutIcon />}
               sx={{ ml: 2 }}
             >
               Logout
@@ -102,7 +142,6 @@ const Navbar = () => {
               color="inherit" 
               component={Link} 
               to="/login"
-              startIcon={<LoginIcon />}
               sx={{ ml: 2 }}
             >
               Login

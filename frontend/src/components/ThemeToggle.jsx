@@ -9,7 +9,19 @@ const ThemeToggle = () => {
 
   return (
     <Tooltip title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}>
-      <IconButton onClick={toggleTheme} color="inherit" className="transition-transform hover:scale-110">
+      <IconButton 
+        onClick={toggleTheme} 
+        color="inherit" 
+        className={`
+          transition-all duration-300 ease-in-out 
+          hover:scale-110 
+          rounded-full p-2 
+          ${darkMode ? 
+            'bg-accentTeal text-darkNavy hover:bg-accentPurple hover:text-lightText' : 
+            'bg-primary hover:bg-accentPurple hover:text-lightText'}
+          shadow-lg hover:shadow-xl
+        `}
+      >
         {darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
       </IconButton>
     </Tooltip>

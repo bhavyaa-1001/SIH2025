@@ -18,6 +18,10 @@ export default {
           DEFAULT: '#009688',
           dark: '#00695f',
         },
+        darkNavy: '#0a192f', // Navy blue for dark mode
+        lightText: '#ffffff', // White text for dark mode
+        accentPurple: '#8a85ff', // Accent color for attractiveness
+        accentTeal: '#64ffda', // Another accent color
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',

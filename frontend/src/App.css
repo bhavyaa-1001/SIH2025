@@ -10,34 +10,38 @@
   --text-primary: #333333;
   --text-secondary: #6c757d;
   --border-color: #dee2e6;
-  --primary-color: #0d6efd;
-  --primary-color-dark: #0a58ca;
+  --primary-color: #2196f3; /* Updated to match our theme */
+  --primary-color-dark: #1769aa;
+  --accent-color: #009688; /* Secondary teal */
   --error-color: #dc3545;
   --error-bg: #f8d7da;
   --success-color: #198754;
   --success-bg: #d1e7dd;
   --disabled-color: #6c757d;
+  --hover-effect: rgba(0, 0, 0, 0.05);
 }
 
-.dark-mode {
-  /* Dark mode variables */
-  --bg-primary: #121212;
-  --bg-secondary: #1e1e1e;
-  --bg-card: #242424;
-  --bg-card-dark: #2d2d2d;
-  --bg-input: #333333;
-  --bg-input-dark: #3a3a3a;
-  --text-primary: #e0e0e0;
-  --text-secondary: #adb5bd;
-  --border-color: #444444;
-  --border-color-dark: #555555;
-  --primary-color: #3d8bfd;
-  --primary-color-dark: #0d6efd;
-  --error-color: #e05260;
+.dark {
+  /* Dark mode variables with navy blue theme */
+  --bg-primary: #0a192f; /* Navy blue */
+  --bg-secondary: #112240;
+  --bg-card: #1d2d50;
+  --bg-card-dark: #233554;
+  --bg-input: #233554;
+  --bg-input-dark: #2c4269;
+  --text-primary: #ffffff; /* White text */
+  --text-secondary: #a8b2d1;
+  --border-color: #233554;
+  --border-color-dark: #2c4269;
+  --primary-color: #64ffda; /* Teal accent */
+  --primary-color-dark: #4ecdc4;
+  --accent-color: #8a85ff; /* Purple accent */
+  --error-color: #ff6b6b;
   --error-bg: #3b2427;
   --success-color: #4dd4ac;
   --success-bg: #1c3832;
-  --disabled-color: #6c757d;
+  --disabled-color: #8892b0;
+  --hover-effect: rgba(100, 255, 218, 0.1);
 }
 
 #root {
