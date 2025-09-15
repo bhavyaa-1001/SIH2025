@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import './App.css'
 
 // Layout
@@ -13,10 +13,14 @@ import ProtectedRoute from './components/ProtectedRoute'
 
 // Pages
 import Home from './pages/Home'
+import Dashboard from './pages/Dashboard'
 import Assessment from './pages/Assessment'
 import Results from './pages/Results'
 import About from './pages/About'
-import ComplianceChecker from './components/ComplianceChecker'
+import Compliance from './pages/Compliance'
+import WaterSavings from './pages/WaterSavings'
+import SystemDesign from './pages/SystemDesign'
+import Maintenance from './pages/Maintenance'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Profile from './pages/Profile'
@@ -30,6 +34,16 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/home" element={
+                <ProtectedRoute>
+                  <Home />
+                </ProtectedRoute>
+              } />
               <Route path="/register" element={<Register />} />
               <Route path="/profile" element={
                 <ProtectedRoute>
@@ -48,7 +62,22 @@ function App() {
               } />
               <Route path="/compliance" element={
                 <ProtectedRoute>
-                  <ComplianceChecker />
+                  <Compliance />
+                </ProtectedRoute>
+              } />
+              <Route path="/water-savings" element={
+                <ProtectedRoute>
+                  <WaterSavings />
+                </ProtectedRoute>
+              } />
+              <Route path="/system-design" element={
+                <ProtectedRoute>
+                  <SystemDesign />
+                </ProtectedRoute>
+              } />
+              <Route path="/maintenance" element={
+                <ProtectedRoute>
+                  <Maintenance />
                 </ProtectedRoute>
               } />
               <Route path="/about" element={<About />} />

@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect } from 'react';
 import { authService } from '../services/api';
+import { jwtDecode } from 'jwt-decode';
 
 export const AuthContext = createContext();
 
@@ -61,6 +62,40 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Google Login
+  const googleLogin = async (credential) => {
+    setLoading(true);
+    setError(null);
+    try {
+      // Decode the credential to get user info
+      const decodedToken = jwtDecode(credential);
+      
+      // In a real app, you would send this token to your backend
+      // const response = await authService.googleLogin({ token: credential });
+      // const data = response.data;
+      
+      // For demo purposes, we'll create a user object from the decoded token
+      const userData = {
+        id: decodedToken.sub,
+        name: decodedToken.name,
+        email: decodedToken.email,
+        picture: decodedToken.picture,
+        token: credential
+      };
+      
+      // Save user to state and localStorage
+      setUser(userData);
+      localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('token', credential);
+      
+      setLoading(false);
+      return userData;
+    } catch (err) {
+      setError('Google login failed');
+      setLoading(false);
+      throw err;
+    }
+  };
   // Logout user
   const logout = () => {
     // Remove user from state and localStorage
@@ -98,6 +133,7 @@ export const AuthProvider = ({ children }) => {
         loading,
         error,
         register,
+        googleLogin,
         login,
         logout,
         updateProfile,

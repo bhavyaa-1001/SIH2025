@@ -36,6 +36,7 @@ const Assessment = () => {
     roofArea: '',
     soilType: '',
     annualRainfall: '',
+    roofImage: null,
     
     // System Specifications
     systemType: '',
@@ -101,6 +102,15 @@ const Assessment = () => {
     });
   };
   
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setFormData({
+        ...formData,
+        roofImage: e.target.files[0]
+      });
+    }
+  };
+  
   const handleNext = () => {
     if (activeStep === steps.length - 1) {
       handleSubmit();
@@ -130,8 +140,7 @@ const Assessment = () => {
         }
       };
       
-      // Use the assessmentService instead of direct axios call
-      const response = await assessmentService.createAssessment(payload);
+      const response = await axios.post('/api/assessments', payload);
       
       // Navigate to results page with assessment ID
       navigate(`/results/${response.data._id}`);
@@ -236,6 +245,39 @@ const Assessment = () => {
                 InputProps={{ inputProps: { min: 0 } }}
                 helperText="Average annual rainfall in your area"
               />
+            </Grid>
+            
+            <Grid item xs={12}>
+              <Typography variant="subtitle1" gutterBottom>
+                Roof Image Upload
+              </Typography>
+              <Button
+                variant="contained"
+                component="label"
+                sx={{ mb: 2 }}
+              >
+                Upload Rooftop Photo
+                <input
+                  type="file"
+                  hidden
+                  accept="image/*"
+                  name="roofImage"
+                  onChange={handleFileChange}
+                />
+              </Button>
+              {formData.roofImage && (
+                <Box sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
+                  <Box
+                    component="img"
+                    src={URL.createObjectURL(formData.roofImage)}
+                    alt="Roof Preview"
+                    sx={{ width: 100, height: 100, objectFit: 'cover', mr: 2 }}
+                  />
+                  <Typography variant="body2">
+                    {formData.roofImage.name}
+                  </Typography>
+                </Box>
+              )}
             </Grid>
           </Grid>
         );

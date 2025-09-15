@@ -1,7 +1,8 @@
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { motion } from 'framer-motion';
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -10,8 +11,15 @@ const Login = () => {
   });
   const [formErrors, setFormErrors] = useState({});
   
-  const { login, loading, error } = useContext(AuthContext);
+  const { login, googleLogin, loading, error, user } = useContext(AuthContext);
   const navigate = useNavigate();
+  
+  // Redirect if user is already logged in
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -53,7 +61,7 @@ const Login = () => {
     
     try {
       await login(formData);
-      navigate('/');
+      navigate('/dashboard');
     } catch (err) {
       console.error('Login error:', err);
       // Error is handled by the AuthContext
@@ -101,9 +109,45 @@ const Login = () => {
           <button type="submit" className="auth-button" disabled={loading}>
             {loading ? 'Logging in...' : 'Login'}
           </button>
+          
+          <div className="auth-separator">
+            <span>OR</span>
+          </div>
+          
+          <div className="google-login-container">
+            <GoogleOAuthProvider 
+              clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID} 
+              onScriptLoadError={(err) => console.error('Google script load error:', err)}
+              options={{
+                use_fedcm_for_prompt: false // Disable FedCM to fix AbortError
+              }}
+            >
+              <GoogleLogin
+                useOneTap
+                context="signin"
+                cancel_on_tap_outside={true}
+                onSuccess={async (credentialResponse) => {
+                  try {
+                    await googleLogin(credentialResponse.credential);
+                    navigate('/dashboard');
+                  } catch (err) {
+                    console.error('Google login error:', err);
+                  }
+                }}
+                onError={(error) => {
+                  console.error('Login Failed:', error);
+                }}
+                theme="filled_blue"
+                text="signin_with"
+                shape="rectangular"
+                logo_alignment="center"
+                width="100%"
+              />
+            </GoogleOAuthProvider>
+          </div>
         </form>
         
-        <p className="auth-redirect">
+        <p className="auth-link">
           Don't have an account? <Link to="/register">Register</Link>
         </p>
       </div>

@@ -1,6 +1,22 @@
 import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { AppBar, Toolbar, Typography, Button, Box, Container, Menu, MenuItem, IconButton, Avatar } from '@mui/material';
+import {
+  AppBar,
+  Box,
+  Toolbar,
+  Typography,
+  IconButton,
+  Badge,
+  Avatar,
+  Button,
+  Container,
+  Menu,
+  MenuItem
+} from '@mui/material';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import SearchIcon from '@mui/icons-material/Search';
+import LoginIcon from '@mui/icons-material/Login';
+import LogoutIcon from '@mui/icons-material/Logout';
 import WaterDropIcon from '@mui/icons-material/WaterDrop';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import ThemeToggle from '../ThemeToggle';
@@ -31,62 +47,69 @@ const Navbar = () => {
   };
 
   return (
-    <AppBar position="static" color="primary">
-      <Container maxWidth="lg">
-        <Toolbar>
-          <WaterDropIcon sx={{ mr: 1 }} />
-          <Typography variant="h6" component={Link} to="/" sx={{ flexGrow: 1, textDecoration: 'none', color: 'inherit' }} className="animate-fade-in">
-            RainSmart
-          </Typography>
-          <Box className="flex items-center">
-            <Button color="inherit" component={Link} to="/">
-              Home
-            </Button>
-            <Button color="inherit" component={Link} to="/assessment">
-              Assessment
-            </Button>
-            <Button color="inherit" component={Link} to="/compliance">
-              Compliance
-            </Button>
-            <Button color="inherit" component={Link} to="/about">
-              About
-            </Button>
-            <ThemeToggle />
-            
-            {user ? (
-              <>
-                <IconButton 
-                  color="inherit" 
-                  onClick={handleMenuOpen}
-                  aria-controls="user-menu"
-                  aria-haspopup="true"
-                >
-                  <AccountCircleIcon />
-                </IconButton>
-                <Menu
-                  id="user-menu"
-                  anchorEl={anchorEl}
-                  keepMounted
-                  open={Boolean(anchorEl)}
-                  onClose={handleMenuClose}
-                >
-                  <MenuItem onClick={handleProfile}>Profile</MenuItem>
-                  <MenuItem onClick={handleLogout}>Logout</MenuItem>
-                </Menu>
-              </>
-            ) : (
-              <>
-                <Button color="inherit" component={Link} to="/login">
-                  Login
-                </Button>
-                <Button color="inherit" component={Link} to="/register">
-                  Register
-                </Button>
-              </>
-            )}
+    <AppBar 
+      position="static" 
+      color="transparent" 
+      elevation={0}
+      sx={{ 
+        borderBottom: '1px solid', 
+        borderColor: 'divider',
+        backgroundColor: 'background.paper'
+      }}
+    >
+      <Toolbar>
+        <WaterDropIcon sx={{ mr: 1 }} />
+        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+            <Typography variant="h5" component={Link} to="/" sx={{ fontWeight: 'bold', textDecoration: 'none', color: 'inherit' }}>
+              Rainwater Harvesting System
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Optimize your water conservation with smart solutions
+            </Typography>
           </Box>
-        </Toolbar>
-      </Container>
+        </Typography>
+
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <IconButton color="inherit">
+            <SearchIcon />
+          </IconButton>
+          
+          {user && (
+            <IconButton color="inherit">
+              <Badge badgeContent={4} color="error">
+                <NotificationsIcon />
+              </Badge>
+            </IconButton>
+          )}
+          
+          <ThemeToggle />
+          
+          {user ? (
+            <Button 
+              color="inherit" 
+              onClick={() => {
+                logout();
+                navigate('/login');
+              }}
+              startIcon={<LogoutIcon />}
+              sx={{ ml: 2 }}
+            >
+              Logout
+            </Button>
+          ) : (
+            <Button 
+              color="inherit" 
+              component={Link} 
+              to="/login"
+              startIcon={<LoginIcon />}
+              sx={{ ml: 2 }}
+            >
+              Login
+            </Button>
+          )}
+        </Box>
+      </Toolbar>
     </AppBar>
   );
 };
