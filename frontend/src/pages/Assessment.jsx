@@ -25,8 +25,9 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import { assessmentService } from '../services/api';
 import axios from 'axios';
+import OptimizedImage from '../components/OptimizedImage';
 
-const steps = ['Property Details', 'System Specifications', 'User Preferences'];
+const steps = ['Property Details'];
 
 const Assessment = () => {
   const navigate = useNavigate();
@@ -43,9 +44,15 @@ const Assessment = () => {
       latitude: null,
       longitude: null
     },
+    addressComponents: {
+      state: '',
+      district: '',
+      block: '',
+      city: ''
+    },
     propertyType: '',
     roofArea: '',
-    soilType: '',
+    materialType: '',
     annualRainfall: '',
     roofImage: null,
     
@@ -288,45 +295,71 @@ const Assessment = () => {
     }
   };
   
-  const handleNext = () => {
-    if (activeStep === steps.length - 1) {
-      handleSubmit();
-    } else {
-      setActiveStep((prevStep) => prevStep + 1);
-    }
-  };
-  
-  const handleBack = () => {
-    setActiveStep((prevStep) => prevStep - 1);
-  };
+  // Direct submission without steps
   
   const handleSubmit = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      // Convert string values to numbers
-      const payload = {
-        ...formData,
-        roofArea: Number(formData.roofArea),
-        annualRainfall: Number(formData.annualRainfall),
-        storageCapacity: formData.storageCapacity ? Number(formData.storageCapacity) : undefined,
-        rechargePit: {
-          depth: Number(formData.rechargePit.depth),
-          diameter: Number(formData.rechargePit.diameter)
-        },
-        coordinates: formData.coordinates.latitude && formData.coordinates.longitude ? {
-          latitude: formData.coordinates.latitude,
-          longitude: formData.coordinates.longitude
-        } : null
-      };
+      // Create FormData object for file upload
+      const formDataObj = new FormData();
+      
+      // Add all form fields to FormData
+      formDataObj.append('location', formData.location);
+      formDataObj.append('propertyType', formData.propertyType);
+      formDataObj.append('roofArea', Number(formData.roofArea));
+      formDataObj.append('materialType', formData.materialType);
+      formDataObj.append('annualRainfall', Number(formData.annualRainfall));
+      
+      // Get current coordinates if not already available
+      if (!formData.coordinates.latitude || !formData.coordinates.longitude) {
+        try {
+          const position = await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject);
+          });
+          
+          const { latitude, longitude } = position.coords;
+          // Update form data with current coordinates
+          setFormData(prev => ({
+            ...prev,
+            coordinates: { latitude, longitude }
+          }));
+          
+          // Add to form data
+          formDataObj.append('latitude', latitude);
+          formDataObj.append('longitude', longitude);
+        } catch (geoError) {
+          console.error('Error getting location:', geoError);
+          // Continue without coordinates
+        }
+      } else {
+        // Add existing coordinates
+        formDataObj.append('latitude', formData.coordinates.latitude);
+        formDataObj.append('longitude', formData.coordinates.longitude);
+      }
+      
+      // Add address components
+      Object.entries(formData.addressComponents).forEach(([key, value]) => {
+        formDataObj.append(`addressComponents[${key}]`, value);
+      });
+      
+      // Add roof image if available
+      if (formData.roofImage) {
+        formDataObj.append('roofImage', formData.roofImage);
+      }
+      
+      // Send data directly to ML model endpoint
+      const response = await axios.post('http://localhost:5000/api/ml/analyze', formDataObj, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
 
-      const response = await axios.post('/api/assessments', payload);
-
-      // Navigate to results page with assessment ID
-      navigate(`/results/${response.data._id}`);
+      // Redirect to the static runoff_report.html page instead of the React route
+      window.location.href = `/runoff_report.html?latitude=${formData.coordinates.latitude}&longitude=${formData.coordinates.longitude}`;
     } catch (err) {
-      setError(err.response?.data?.error || 'An error occurred while submitting the assessment');
+      setError(err.response?.data?.error || 'An error occurred while submitting the assessment to ML models');
     } finally {
       setLoading(false);
     }
@@ -446,6 +479,29 @@ const Assessment = () => {
             </Grid>
             
             <Grid item xs={12} sm={6}>
+              <FormControl fullWidth required margin="normal">
+                <InputLabel id="material-type-label">Material Type of Rooftop</InputLabel>
+                <Select
+                  labelId="material-type-label"
+                  id="materialType"
+                  name="materialType"
+                  value={formData.materialType}
+                  onChange={handleInputChange}
+                  label="Material Type of Rooftop"
+                >
+                  <MenuItem value="">Select material type</MenuItem>
+                  <MenuItem value="Metal Sheet">Metal Sheet Roof (Galvanized, etc.)</MenuItem>
+                  <MenuItem value="Concrete/Tiled">Concrete / Tiled Roof</MenuItem>
+                  <MenuItem value="Asphalt/Tar">Asphalt / Tar Roof</MenuItem>
+                  <MenuItem value="Brick">Brick Pavement</MenuItem>
+                  <MenuItem value="Untreated Ground">Untreated Ground (Slopes &lt; 10%)</MenuItem>
+                  <MenuItem value="Natural Rocky">Natural Rocky Catchment</MenuItem>
+                </Select>
+                <FormHelperText>Type of rooftop material at your property</FormHelperText>
+              </FormControl>
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
                 label="Roof Area (m²)"
@@ -513,16 +569,21 @@ const Assessment = () => {
                 />
               </Button>
               {formData.roofImage && (
-                <Box sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
-                  <Box
-                    component="img"
-                    src={URL.createObjectURL(formData.roofImage)}
-                    alt="Roof Preview"
-                    sx={{ width: 100, height: 100, objectFit: 'cover', mr: 2 }}
-                  />
-                  <Typography variant="body2">
-                    {formData.roofImage.name}
-                  </Typography>
+                <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', maxWidth: '100%' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1, maxWidth: '100%' }}>
+                    <Box sx={{ width: 100, height: 100, overflow: 'hidden' }}>
+                      <img
+                        src={URL.createObjectURL(formData.roofImage)}
+                        alt="Roof Preview"
+                        width={100}
+                        height={100}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    </Box>
+                    <Typography variant="body2" noWrap sx={{ maxWidth: '70%', overflow: 'hidden', textOverflow: 'ellipsis', ml: 2 }}>
+                      {formData.roofImage.name}
+                    </Typography>
+                  </Box>
                 </Box>
               )}
             </Grid>
@@ -697,8 +758,8 @@ const Assessment = () => {
   
   return (
     <Container maxWidth="lg">
-      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4 }}>
-        <Box component="img" src="/assets/assessment.jpg" alt="Rainwater Harvesting Assessment" sx={{ maxWidth: '100%', height: 'auto', maxHeight: 300 }} />
+      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4, overflow: 'hidden' }}>
+        <Box component="img" src="/assets/assessment.jpg" alt="Rainwater Harvesting Assessment" sx={{ width: '100%', height: 'auto', maxHeight: 300, objectFit: 'contain' }} />
       </Box>
       <Paper elevation={3} sx={{ p: 4, mb: 4 }}>
         <Typography variant="h4" component="h1" align="center" gutterBottom>
@@ -723,26 +784,19 @@ const Assessment = () => {
           {getStepContent(activeStep)}
         </Box>
         
-        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Button
-            disabled={activeStep === 0 || loading}
-            onClick={handleBack}
-          >
-            Back
-          </Button>
-          
+        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
           <Button
             variant="contained"
             color="primary"
-            onClick={handleNext}
+            onClick = {handleSubmit}
             disabled={loading}
+            size="large"
+            sx={{ minWidth: 200, py: 1.5 }}
           >
             {loading ? (
               <CircularProgress size={24} />
-            ) : activeStep === steps.length - 1 ? (
-              'Submit'
             ) : (
-              'Next'
+              'Submit to ML Model'
             )}
           </Button>
         </Box>

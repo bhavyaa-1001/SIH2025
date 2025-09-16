@@ -26,7 +26,7 @@ const createAssessment = asyncHandler(async (req, res) => {
     propertyType,
     roofArea,
     roofMaterial,
-    soilType,
+    materialType,
     annualRainfall,
     systemType,
     storageCapacity,

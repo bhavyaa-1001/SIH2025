@@ -16,6 +16,7 @@ import {
   CardContent,
   CardMedia
 } from '@mui/material';
+import OptimizedImage from '../components/OptimizedImage';
 import ArchitectureIcon from '@mui/icons-material/Architecture';
 import EngineeringIcon from '@mui/icons-material/Engineering';
 import WaterIcon from '@mui/icons-material/Water';
@@ -238,8 +239,7 @@ const SystemDesign = () => {
             {designRecommendation.components.map((component, index) => (
               <Grid item xs={12} sm={6} md={4} key={index}>
                 <Card sx={{ height: '100%' }}>
-                  <CardMedia
-                    component="div"
+                  <Box
                     sx={{
                       height: 140,
                       bgcolor: 'primary.light',
@@ -249,7 +249,7 @@ const SystemDesign = () => {
                     }}
                   >
                     <WaterIcon sx={{ fontSize: 60, color: 'primary.main' }} />
-                  </CardMedia>
+                  </Box>
                   <CardContent>
                     <Typography variant="h6" component="div">
                       {component.name}

@@ -12,6 +12,10 @@ const assessmentRoutes = require('./routes/assessment.routes');
 const complianceRoutes = require('./routes/complianceRoutes');
 const explanationRoutes = require('./routes/explanation.routes');
 const userRoutes = require('./routes/user.routes');
+const waterSavingsRoutes = require('./routes/waterSavings.routes');
+const mlRoutes = require('./routes/ml.routes');
+const runoffRoutes = require('./routes/runoff.routes');
+const runoffReportRoutes = require('./routes/runoff_report.routes');
 
 // Initialize express app
 const app = express();
@@ -45,7 +49,11 @@ const connectDB = async () => {
 app.use('/api/assessments', assessmentRoutes);
 app.use('/api/compliance', complianceRoutes);
 app.use('/api/explanation', explanationRoutes);
+app.use('/api/runoff-report', runoffReportRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/runoff', runoffRoutes);
+app.use('/api/water-savings', waterSavingsRoutes);
+app.use('/api/ml', mlRoutes);
 
 // Root route
 app.get('/', (req, res) => {

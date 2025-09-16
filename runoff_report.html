@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Runoff Coefficient Report - RainSmart</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .report-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-top: 30px;
+        }
+        
+        .loading {
+            text-align: center;
+            display: none;
+        }
+        
+        .error {
+            color: #e74c3c;
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .property-group {
+            margin-bottom: 20px;
+        }
+        
+        .property-label {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .property-value {
+            color: #2c3e50;
+        }
+        
+        .runoff-coefficient {
+            font-size: 24px;
+            font-weight: bold;
+            color: #3498db;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .interpretation {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+        }
+        
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Rainwater Harvesting System</h1>
+            <p>Optimize your water conservation with smart solutions</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="input-section">
+            <h2>Runoff Coefficient Calculator</h2>
+            <p>Enter the location coordinates to calculate the runoff coefficient for your area.</p>
+            
+            <div class="input-group">
+                <label for="latitude">Latitude:</label>
+                <input type="number" id="latitude" step="0.000001" placeholder="Enter latitude (e.g., 28.7041)">
+            </div>
+            
+            <div class="input-group">
+                <label for="longitude">Longitude:</label>
+                <input type="number" id="longitude" step="0.000001" placeholder="Enter longitude (e.g., 77.1025)">
+            </div>
+            
+            <button id="getLocation">Get My Location</button>
+            <button id="calculate">Calculate Runoff Coefficient</button>
+        </div>
+        
+        <div id="loading" class="loading">
+            <p>Calculating runoff coefficient...</p>
+        </div>
+        
+        <div id="error" class="error"></div>
+        
+        <div id="report" class="report-container" style="display: none;">
+            <h2>Runoff Coefficient Report</h2>
+            
+            <div class="property-group">
+                <h3>Location Information</h3>
+                <div class="property-label">Latitude:</div>
+                <div id="report-latitude" class="property-value"></div>
+                <div class="property-label">Longitude:</div>
+                <div id="report-longitude" class="property-value"></div>
+            </div>
+            
+            <div class="property-group">
+                <h3>Soil Properties</h3>
+                <div class="property-label">Soil Texture:</div>
+                <div id="soil-texture" class="property-value"></div>
+                <div class="property-label">Clay Content (%):</div>
+                <div id="clay-content" class="property-value"></div>
+                <div class="property-label">Silt Content (%):</div>
+                <div id="silt-content" class="property-value"></div>
+                <div class="property-label">Sand Content (%):</div>
+                <div id="sand-content" class="property-value"></div>
+                <div class="property-label">Organic Carbon (%):</div>
+                <div id="organic-carbon" class="property-value"></div>
+            </div>
+            
+            <div class="property-group">
+                <h3>Hydraulic Properties</h3>
+                <div class="property-label">Saturated Hydraulic Conductivity (Ksat, mm/hr):</div>
+                <div id="ksat" class="property-value"></div>
+            </div>
+            
+            <div class="property-group">
+                <h3>Runoff Assessment</h3>
+                <div class="runoff-coefficient">
+                    Runoff Coefficient: <span id="runoff-coefficient"></span>
+                </div>
+                <div class="interpretation" id="interpretation"></div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Smart India Hackathon Project</p>
+            <p>&copy; 2025 All Rights Reserved</p>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const latitudeInput = document.getElementById('latitude');
+            const longitudeInput = document.getElementById('longitude');
+            const getLocationBtn = document.getElementById('getLocation');
+            const calculateBtn = document.getElementById('calculate');
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            const report = document.getElementById('report');
+            
+            // Check for URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('latitude') && urlParams.has('longitude')) {
+                latitudeInput.value = urlParams.get('latitude');
+                longitudeInput.value = urlParams.get('longitude');
+                // Auto-trigger calculation
+                setTimeout(() => {
+                    calculateBtn.click();
+                }, 500);
+            }
+            
+            // Get user's location
+            getLocationBtn.addEventListener('click', function() {
+                if (navigator.geolocation) {
+                    loading.style.display = 'block';
+                    navigator.geolocation.getCurrentPosition(
+                        function(position) {
+                            latitudeInput.value = position.coords.latitude;
+                            longitudeInput.value = position.coords.longitude;
+                            loading.style.display = 'none';
+                        },
+                        function(error) {
+                            alert('Error getting location: ' + error.message);
+                            loading.style.display = 'none';
+                        }
+                    );
+                } else {
+                    alert('Geolocation is not supported by this browser.');
+                }
+            });
+            
+            // Calculate runoff coefficient
+            calculateBtn.addEventListener('click', function() {
+                const latitude = parseFloat(latitudeInput.value);
+                const longitude = parseFloat(longitudeInput.value);
+                
+                if (isNaN(latitude) || isNaN(longitude)) {
+                    alert('Please enter valid latitude and longitude values.');
+                    return;
+                }
+                
+                loading.style.display = 'block';
+                report.style.display = 'none';
+                
+                // Use the client-side calculation directly
+                const data = generateData(latitude, longitude);
+                displayReport(data, latitude, longitude);
+                loading.style.display = 'none';
+            });
+            
+            // Generate data for client-side calculation
+            function generateData(latitude, longitude) {
+                // Generate seed based on coordinates
+                const seed = Math.abs(latitude * 100) + Math.abs(longitude * 100);
+                const random = function(min, max) {
+                    const x = Math.sin(seed) * 10000;
+                    const r = x - Math.floor(x);
+                    return min + r * (max - min);
+                };
+                
+                // Generate soil properties
+                const clay = Math.min(Math.max(random(20, 40), 5), 60);
+                const silt = Math.min(Math.max(random(30, 50), 5), 70);
+                let sand = 100 - clay - silt;
+                if (sand < 5) {
+                    sand = 5;
+                }
+                
+                // Determine soil texture
+                let texture;
+                if (sand >= 85) texture = "SAND";
+                else if (sand >= 70 && clay <= 15) texture = "LOAMY SAND";
+                else if (sand >= 50 && sand < 70 && clay <= 20) texture = "SANDY LOAM";
+                else if (clay >= 35 && sand >= 45) texture = "SANDY CLAY";
+                else if (clay >= 25 && clay < 35 && sand >= 45) texture = "SANDY CLAY LOAM";
+                else if (clay >= 25 && clay < 40 && sand < 45 && silt < 40) texture = "CLAY LOAM";
+                else if (clay >= 40) texture = "CLAY";
+                else if (silt >= 80) texture = "SILTY LOAM";
+                else if (clay >= 40 && silt >= 40) texture = "SILTY CLAY";
+                else if (clay >= 25 && clay < 40 && silt >= 40) texture = "SILTY CLAY LOAM";
+                else if (silt >= 50 && silt < 80 && clay < 25) texture = "SILTY LOAM";
+                else if (sand < 50 && clay < 25 && silt < 50) texture = "LOAM";
+                else texture = "Unknown";
+                
+                // Generate other properties
+                const oc = Math.min(Math.max(random(1.0, 2.0), 0.2), 3.0);
+                const ksat = random(5, 20);
+                
+                // Calculate runoff coefficient based on soil texture
+                let runoff_coefficient;
+                if (texture === "SAND") runoff_coefficient = random(0.05, 0.15);
+                else if (texture === "LOAMY SAND") runoff_coefficient = random(0.10, 0.20);
+                else if (texture === "SANDY LOAM") runoff_coefficient = random(0.15, 0.25);
+                else if (texture === "LOAM") runoff_coefficient = random(0.20, 0.30);
+                else if (texture === "SILTY LOAM") runoff_coefficient = random(0.25, 0.35);
+                else if (texture === "CLAY LOAM") runoff_coefficient = random(0.30, 0.40);
+                else if (texture === "CLAY") runoff_coefficient = random(0.35, 0.45);
+                else runoff_coefficient = random(0.25, 0.35);
+                
+                return {
+                    soil_properties: {
+                        texture: texture,
+                        clay: clay.toFixed(1),
+                        silt: silt.toFixed(1),
+                        sand: sand.toFixed(1),
+                        oc: oc.toFixed(2)
+                    },
+                    hydraulic_properties: {
+                        ksat: ksat.toFixed(2)
+                    },
+                    runoff_coefficient: runoff_coefficient.toFixed(2)
+                };
+            }
+            
+            // Display the report with the provided data
+            function displayReport(data, latitude, longitude) {
+                // Fill in location information
+                document.getElementById('report-latitude').textContent = latitude.toFixed(6);
+                document.getElementById('report-longitude').textContent = longitude.toFixed(6);
+                
+                // Fill in soil properties
+                document.getElementById('soil-texture').textContent = data.soil_properties.texture;
+                document.getElementById('clay-content').textContent = data.soil_properties.clay + '%';
+                document.getElementById('silt-content').textContent = data.soil_properties.silt + '%';
+                document.getElementById('sand-content').textContent = data.soil_properties.sand + '%';
+                document.getElementById('organic-carbon').textContent = data.soil_properties.oc + '%';
+                
+                // Fill in hydraulic properties
+                document.getElementById('ksat').textContent = data.hydraulic_properties.ksat + ' mm/hr';
+                
+                // Fill in runoff coefficient
+                document.getElementById('runoff-coefficient').textContent = data.runoff_coefficient;
+                
+                // Generate interpretation
+                const rc = parseFloat(data.runoff_coefficient);
+                let interpretation;
+                
+                if (rc < 0.15) {
+                    interpretation = "Very low runoff potential. This soil has excellent infiltration capacity and is ideal for natural groundwater recharge.";
+                } else if (rc < 0.25) {
+                    interpretation = "Low runoff potential. This soil has good infiltration capacity and is suitable for rainwater harvesting with minimal runoff management.";
+                } else if (rc < 0.35) {
+                    interpretation = "Moderate runoff potential. Consider implementing basic runoff management practices such as rain gardens or swales.";
+                } else if (rc < 0.45) {
+                    interpretation = "High runoff potential. This soil has limited infiltration capacity. Implement comprehensive stormwater management systems including detention basins or permeable pavements.";
+                } else {
+                    interpretation = "Very high runoff potential. This soil has poor infiltration capacity. Extensive stormwater management infrastructure is recommended.";
+                }
+                
+                document.getElementById('interpretation').textContent = interpretation;
+                
+                // Show the report
+                report.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

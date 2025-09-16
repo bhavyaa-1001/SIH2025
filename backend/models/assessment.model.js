@@ -53,9 +53,9 @@ const assessmentSchema = mongoose.Schema(
       type: String,
       enum: ['Concrete', 'Metal', 'Tile', 'Asphalt', 'Other'],
     },
-    soilType: {
+    materialType: {
       type: String,
-      required: [true, 'Please add soil type'],
+      required: [true, 'Please add material type'],
       enum: ['Sandy', 'Loamy', 'Clay', 'Silt', 'Rocky', 'Other'],
     },
     systemType: {

@@ -12,6 +12,7 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import WaterIcon from '@mui/icons-material/Water';
 import AnimatedCard from '../components/AnimatedCard';
+import OptimizedImage from '../components/OptimizedImage';
 import { ThemeContext } from '../context/ThemeContext';
 import { cssAnimations } from '../utils/animations';
 
@@ -92,16 +93,12 @@ const Home = () => {
               </Stack>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Box 
-                component="img"
+              <OptimizedImage 
                 src="/hero-image.svg" 
                 alt="Rainwater harvesting illustration"
-                sx={{
-                  width: '100%',
-                  maxHeight: 400,
-                  objectFit: 'contain',
-                  display: { xs: 'none', md: 'block' }
-                }}
+                width="100%"
+                height={400}
+                className="hidden md:block"
               />
             </Grid>
           </Grid>

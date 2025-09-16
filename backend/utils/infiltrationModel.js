@@ -6,7 +6,8 @@ const MultivariateLinearRegression = require('ml-regression-multivariate-linear'
  * @returns {Object} Predicted infiltration rate and related data
  */
 function predictInfiltrationRate(params) {
-  const { soilType, soilProperties, groundwaterLevel, fieldTestResults } = params;
+  const { materialType, soilProperties, groundwaterLevel, fieldTestResults } = params;
+  const soilType = materialType; // For backward compatibility
   
   // Soil type base infiltration rates in mm/hr
   const baseInfiltrationRates = {
