@@ -20,6 +20,39 @@ const RunoffReport = () => {
   const [error, setError] = useState(null);
   const [report, setReport] = useState(null);
   
+  // Helper function to calculate runoff coefficient based on soil texture and ksat
+  const calculateRunoffCoefficient = (texture, ksat) => {
+    // Base runoff coefficient on soil texture
+    let base;
+    if (texture === "SAND") base = 0.10;
+    else if (texture === "LOAMY SAND") base = 0.15;
+    else if (texture === "SANDY LOAM") base = 0.20;
+    else if (texture === "LOAM") base = 0.25;
+    else if (texture === "SILTY LOAM") base = 0.30;
+    else if (texture === "CLAY LOAM") base = 0.35;
+    else if (texture === "CLAY") base = 0.40;
+    else base = 0.30;
+    
+    // Adjust based on ksat (higher ksat = lower runoff)
+    const ksatFactor = Math.max(0, Math.min(0.15, (20 - ksat) / 100));
+    
+    return (base + ksatFactor).toFixed(2);
+  };
+  
+  // Helper function to generate interpretation text
+  const generateInterpretation = (runoffCoefficient) => {
+    const rc = parseFloat(runoffCoefficient);
+    if (rc < 0.3) {
+      return "LOW RUNOFF POTENTIAL: This area has good water infiltration capacity. Soil can absorb most rainfall, reducing surface runoff.";
+    } else if (rc < 0.5) {
+      return "MODERATE RUNOFF POTENTIAL: This area has average water infiltration. Some rainfall will become surface runoff during moderate to heavy precipitation events.";
+    } else if (rc < 0.7) {
+      return "HIGH RUNOFF POTENTIAL: This area has limited water infiltration capacity. A significant portion of rainfall will become surface runoff, increasing erosion and flooding risks.";
+    } else {
+      return "VERY HIGH RUNOFF POTENTIAL: This area has poor water infiltration. Most rainfall will become surface runoff, creating high risks of erosion, flooding, and water quality issues.";
+    }
+  };
+  
   // Get coordinates and assessment ID from location state or URL params
   const queryParams = new URLSearchParams(window.location.search);
   const latFromUrl = queryParams.get('latitude');
@@ -115,15 +148,31 @@ const RunoffReport = () => {
       }
       
       try {
-        // Try to get data from API
-        const response = await axios.post('/api/runoff-report', {
-          latitude,
-          longitude
+        // Try to get data from FastAPI endpoint
+        const response = await axios.post('http://localhost:8000/predict', {
+          latitude: parseFloat(latitude),
+          longitude: parseFloat(longitude),
+          manual_input: false
         });
         
-        setReport(response.data);
+        // Transform the FastAPI response to match our report format
+        const apiData = response.data;
+        const reportData = {
+          runoff_coefficient: calculateRunoffCoefficient(apiData.soil_texture, apiData.ksat),
+          ksat: apiData.ksat.toFixed(2),
+          soil_properties: {
+            texture: apiData.soil_texture,
+            clay: apiData.soil_properties.clay.toFixed(1),
+            silt: apiData.soil_properties.silt.toFixed(1),
+            sand: apiData.soil_properties.sand.toFixed(1),
+            organic_carbon: apiData.soil_properties.oc.toFixed(2)
+          },
+          interpretation: generateInterpretation(calculateRunoffCoefficient(apiData.soil_texture, apiData.ksat))
+        };
+        
+        setReport(reportData);
       } catch (err) {
-        console.log('API call failed, using fallback calculation');
+        console.log('API call failed, using fallback calculation', err);
         // Use fallback client-side calculation if API fails
         const fallbackData = generateFallbackData(parseFloat(latitude), parseFloat(longitude));
         setReport(fallbackData);
