@@ -45,7 +45,7 @@ const Sidebar = ({ onLogout }) => {
       <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
         <Typography variant="h6" color="primary" sx={{ fontSize: 24 }}>💧</Typography>
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          RainSmart
+          Drop2Source
         </Typography>
       </Box>
       

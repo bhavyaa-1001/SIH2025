@@ -45,7 +45,7 @@ const Dashboard = () => {
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom>
-          Welcome to RainSmart! 👋
+          Welcome to Drop2Source! 👋
         </Typography>
         <Typography variant="subtitle1" color="text.secondary">
           Your rainwater harvesting system management platform
@@ -207,7 +207,7 @@ const Dashboard = () => {
         </Grid>
 
         {/* Quick Access Buttons */}
-        <Grid item xs={12}>
+        {/* <Grid item xs={12}>
           <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 2 }}>
             <Button
               variant="outlined"
@@ -226,168 +226,9 @@ const Dashboard = () => {
               Check Compliance
             </Button>
           </Box>
-        </Grid>
+        </Grid> */}
       </Grid>
 
-      {/* History and Status Sections */}
-      <Box sx={{ mt: 6 }}>
-        <Typography variant="h5" component="h2" gutterBottom>
-          Assessment History & Status
-        </Typography>
-        <Grid container spacing={3}>
-          {/* History Section */}
-          <Grid item xs={12} md={4}>
-            <Paper
-              elevation={0}
-              sx={{
-                p: 3,
-                borderRadius: 2,
-                border: '1px solid',
-                borderColor: 'divider',
-                height: '100%',
-              }}
-            >
-              <Typography variant="h6" gutterBottom>
-                Assessment History
-              </Typography>
-              {loading ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-                  <Typography>Loading history...</Typography>
-                </Box>
-              ) : error ? (
-                <Box sx={{ p: 2, color: 'error.main' }}>
-                  <Typography>{error}</Typography>
-                </Box>
-              ) : completedAssessments.length === 0 ? (
-                <Typography variant="body2" color="text.secondary">
-                  No completed assessments found.
-                </Typography>
-              ) : (
-                <Box sx={{ maxHeight: 300, overflow: 'auto' }}>
-                  {completedAssessments.map((assessment) => (
-                    <Card key={assessment._id} sx={{ mb: 2, bgcolor: 'background.default' }}>
-                      <CardContent>
-                        <Typography variant="subtitle2">
-                          {assessment.propertyDetails?.propertyName || 'Unnamed Property'}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Completed on: {new Date(assessment.updatedAt).toLocaleDateString()}
-                        </Typography>
-                        <Button
-                          component={Link}
-                          to={`/results/${assessment._id}`}
-                          size="small"
-                          sx={{ mt: 1 }}
-                        >
-                          View Details
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </Box>
-              )}
-            </Paper>
-          </Grid>
-
-          {/* Pending Reports Section */}
-          <Grid item xs={12} md={4}>
-            <Paper
-              elevation={0}
-              sx={{
-                p: 3,
-                borderRadius: 2,
-                border: '1px solid',
-                borderColor: 'divider',
-                height: '100%',
-              }}
-            >
-              <Typography variant="h6" gutterBottom>
-                Pending Reports
-              </Typography>
-              {loading ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-                  <Typography>Loading pending reports...</Typography>
-                </Box>
-              ) : error ? (
-                <Box sx={{ p: 2, color: 'error.main' }}>
-                  <Typography>{error}</Typography>
-                </Box>
-              ) : pendingAssessments.length === 0 ? (
-                <Typography variant="body2" color="text.secondary">
-                  No pending reports.
-                </Typography>
-              ) : (
-                <Box sx={{ maxHeight: 300, overflow: 'auto' }}>
-                  {pendingAssessments.map((assessment) => (
-                    <Card key={assessment._id} sx={{ mb: 2, bgcolor: 'background.default' }}>
-                      <CardContent>
-                        <Typography variant="subtitle2">
-                          {assessment.propertyDetails?.propertyName || 'Unnamed Property'}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Submitted on: {new Date(assessment.createdAt).toLocaleDateString()}
-                        </Typography>
-                        <Typography variant="body2" sx={{ color: 'warning.main', mt: 1 }}>
-                          Status: Processing
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </Box>
-              )}
-            </Paper>
-          </Grid>
-
-          {/* Queue Data Section */}
-          <Grid item xs={12} md={4}>
-            <Paper
-              elevation={0}
-              sx={{
-                p: 3,
-                borderRadius: 2,
-                border: '1px solid',
-                borderColor: 'divider',
-                height: '100%',
-              }}
-            >
-              <Typography variant="h6" gutterBottom>
-                In Queue
-              </Typography>
-              {loading ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-                  <Typography>Loading queue data...</Typography>
-                </Box>
-              ) : error ? (
-                <Box sx={{ p: 2, color: 'error.main' }}>
-                  <Typography>{error}</Typography>
-                </Box>
-              ) : queuedAssessments.length === 0 ? (
-                <Typography variant="body2" color="text.secondary">
-                  No assessments in queue.
-                </Typography>
-              ) : (
-                <Box sx={{ maxHeight: 300, overflow: 'auto' }}>
-                  {queuedAssessments.map((assessment) => (
-                    <Card key={assessment._id} sx={{ mb: 2, bgcolor: 'background.default' }}>
-                      <CardContent>
-                        <Typography variant="subtitle2">
-                          {assessment.propertyDetails?.propertyName || 'Unnamed Property'}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Added to queue: {new Date(assessment.createdAt).toLocaleDateString()}
-                        </Typography>
-                        <Typography variant="body2" sx={{ color: 'info.main', mt: 1 }}>
-                          Status: In Queue
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </Box>
-              )}
-            </Paper>
-          </Grid>
-        </Grid>
-      </Box>
     </Container>
   );
 };
