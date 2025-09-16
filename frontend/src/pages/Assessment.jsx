@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -17,9 +17,14 @@ import {
   MenuItem,
   FormHelperText,
   CircularProgress,
-  Alert
+  Alert,
+  Chip,
+  IconButton
 } from '@mui/material';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import MyLocationIcon from '@mui/icons-material/MyLocation';
 import { assessmentService } from '../services/api';
+import axios from 'axios';
 
 const steps = ['Property Details', 'System Specifications', 'User Preferences'];
 
@@ -28,10 +33,16 @@ const Assessment = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [locationError, setLocationError] = useState(null);
+
   const [formData, setFormData] = useState({
     // Property Details
     location: '',
+    coordinates: {
+      latitude: null,
+      longitude: null
+    },
     propertyType: '',
     roofArea: '',
     soilType: '',
@@ -55,9 +66,175 @@ const Assessment = () => {
     }
   });
   
+  // Geolocation functions
+  const getCurrentLocation = () => {
+    setLocationLoading(true);
+    setLocationError(null);
+
+    if (!navigator.geolocation) {
+      setLocationError('Geolocation is not supported by this browser.');
+      setLocationLoading(false);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setFormData({
+          ...formData,
+          coordinates: {
+            latitude,
+            longitude
+          },
+          location: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
+        });
+        setLocationLoading(false);
+
+        // Optionally, you can reverse geocode to get the address
+        reverseGeocode(latitude, longitude);
+      },
+      (error) => {
+        let errorMessage = 'Unable to retrieve your location.';
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = 'Location access denied by user.';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = 'Location information is unavailable.';
+            break;
+          case error.TIMEOUT:
+            errorMessage = 'Location request timed out.';
+            break;
+          default:
+            errorMessage = 'An unknown error occurred.';
+            break;
+        }
+        setLocationError(errorMessage);
+        setLocationLoading(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 60000
+      }
+    );
+  };
+
+  const reverseGeocode = async (latitude, longitude) => {
+    try {
+      // Using BigDataCloud for detailed administrative information
+      const response = await fetch(
+        `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+      );
+      const data = await response.json();
+
+      if (data) {
+        // Extract administrative hierarchy
+        const addressComponents = {
+          state: data.principalSubdivision || data.countrySubdivision || '',
+          district: data.locality || data.city || '',
+          block: data.localityInfo?.administrative?.[3]?.name ||
+                 data.localityInfo?.administrative?.[2]?.name ||
+                 data.postcode || '',
+          city: data.city || data.locality || data.localityInfo?.administrative?.[1]?.name || ''
+        };
+
+        // Try alternative API for better administrative division data
+        await enhanceWithNominatimData(latitude, longitude, addressComponents);
+
+        // Format the comprehensive address
+        const formattedLocation = formatComprehensiveAddress(addressComponents);
+
+        setFormData(prev => ({
+          ...prev,
+          location: formattedLocation,
+          addressComponents: addressComponents // Store components separately for potential future use
+        }));
+      }
+    } catch (error) {
+      console.error('Reverse geocoding failed:', error);
+      // Keep the coordinates as location if reverse geocoding fails
+    }
+  };
+
+  const enhanceWithNominatimData = async (latitude, longitude, addressComponents) => {
+    try {
+      // Use Nominatim (OpenStreetMap) for better administrative division data
+      const nominatimResponse = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10&addressdetails=1`
+      );
+      const nominatimData = await nominatimResponse.json();
+
+      if (nominatimData && nominatimData.address) {
+        const addr = nominatimData.address;
+
+        // Extract administrative levels with fallbacks
+        addressComponents.state = addressComponents.state ||
+                                 addr.state ||
+                                 addr.state_district ||
+                                 addr.region || '';
+
+        addressComponents.district = addressComponents.district ||
+                                   addr.state_district ||
+                                   addr.county ||
+                                   addr.district ||
+                                   addr.city_district || '';
+
+        addressComponents.block = addressComponents.block ||
+                                addr.suburb ||
+                                addr.neighbourhood ||
+                                addr.quarter ||
+                                addr.city_block ||
+                                addr.postcode || '';
+
+        addressComponents.city = addressComponents.city ||
+                               addr.city ||
+                               addr.town ||
+                               addr.village ||
+                               addr.municipality || '';
+      }
+    } catch (error) {
+      console.error('Nominatim geocoding failed:', error);
+      // Continue with existing data if Nominatim fails
+    }
+  };
+
+  const formatComprehensiveAddress = (components) => {
+    // Clean and filter non-empty components
+    const cleanComponent = (str) => {
+      if (!str) return '';
+      return str.trim().replace(/^\d+$/, ''); // Remove pure numeric strings (postcodes)
+    };
+
+    const state = cleanComponent(components.state);
+    const district = cleanComponent(components.district);
+    const block = cleanComponent(components.block);
+    const city = cleanComponent(components.city);
+
+    // Build hierarchical address array, avoiding duplicates
+    const addressParts = [];
+    const addedParts = new Set();
+
+    // Add components in order: City, Block, District, State
+    [city, block, district, state].forEach(part => {
+      if (part && !addedParts.has(part.toLowerCase())) {
+        addressParts.push(part);
+        addedParts.add(part.toLowerCase());
+      }
+    });
+
+    // Format as "City, Block, District, State" or fallback to available parts
+    if (addressParts.length > 0) {
+      return addressParts.join(', ');
+    }
+
+    // Fallback to coordinates if no address components found
+    return `${formData.coordinates.latitude.toFixed(6)}, ${formData.coordinates.longitude.toFixed(6)}`;
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
+
     if (name.includes('.')) {
       const [parent, child] = name.split('.');
       setFormData({
@@ -126,7 +303,7 @@ const Assessment = () => {
   const handleSubmit = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       // Convert string values to numbers
       const payload = {
@@ -137,11 +314,15 @@ const Assessment = () => {
         rechargePit: {
           depth: Number(formData.rechargePit.depth),
           diameter: Number(formData.rechargePit.diameter)
-        }
+        },
+        coordinates: formData.coordinates.latitude && formData.coordinates.longitude ? {
+          latitude: formData.coordinates.latitude,
+          longitude: formData.coordinates.longitude
+        } : null
       };
-      
+
       const response = await axios.post('/api/assessments', payload);
-      
+
       // Navigate to results page with assessment ID
       navigate(`/results/${response.data._id}`);
     } catch (err) {
@@ -156,26 +337,92 @@ const Assessment = () => {
       case 0:
         return (
           <Grid container spacing={3}>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth required>
-                <InputLabel id="location-label">Location</InputLabel>
-                <Select
-                  labelId="location-label"
-                  name="location"
-                  value={formData.location}
-                  onChange={handleInputChange}
-                  label="Location"
-                >
-                  <MenuItem value="">Select a location</MenuItem>
-                  <MenuItem value="Delhi">Delhi</MenuItem>
-                  <MenuItem value="Mumbai">Mumbai</MenuItem>
-                  <MenuItem value="Bangalore">Bangalore</MenuItem>
-                  <MenuItem value="Chennai">Chennai</MenuItem>
-                  <MenuItem value="Hyderabad">Hyderabad</MenuItem>
-                  <MenuItem value="Pune">Pune</MenuItem>
-                </Select>
-                <FormHelperText>Select your property location</FormHelperText>
-              </FormControl>
+            <Grid item xs={12}>
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="subtitle1" gutterBottom>
+                  Property Location
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+                  <TextField
+                    fullWidth
+                    label="Location"
+                    name="location"
+                    value={formData.location}
+                    onChange={handleInputChange}
+                    required
+                    multiline
+                    maxRows={3}
+                    helperText={
+                      formData.coordinates.latitude && formData.coordinates.longitude
+                        ? `Auto-detected coordinates: ${formData.coordinates.latitude.toFixed(6)}, ${formData.coordinates.longitude.toFixed(6)}`
+                        : "Enter your location manually or use auto-detect for precise coordinates"
+                    }
+                    slotProps={{
+                      input: {
+                        startAdornment: formData.coordinates.latitude && formData.coordinates.longitude && (
+                          <LocationOnIcon color="primary" sx={{ mr: 1, alignSelf: 'flex-start', mt: 0.5 }} />
+                        ),
+                      },
+                    }}
+                  />
+                  <Button
+                    variant="outlined"
+                    onClick={getCurrentLocation}
+                    disabled={locationLoading}
+                    startIcon={locationLoading ? <CircularProgress size={20} /> : <MyLocationIcon />}
+                    sx={{ minWidth: 'auto', px: 2 }}
+                  >
+                    {locationLoading ? 'Detecting...' : 'Auto-detect'}
+                  </Button>
+                </Box>
+
+                {locationError && (
+                  <Alert severity="error" sx={{ mt: 1 }}>
+                    {locationError}
+                  </Alert>
+                )}
+
+                {formData.coordinates.latitude && formData.coordinates.longitude && (
+                  <Box sx={{ mt: 1 }}>
+                    <Chip
+                      icon={<LocationOnIcon />}
+                      label="Location auto-detected successfully"
+                      color="success"
+                      variant="outlined"
+                      size="small"
+                    />
+                    {formData.addressComponents && (
+                      <Box sx={{ mt: 1, p: 1, bgcolor: 'success.light', borderRadius: 1, border: '1px solid', borderColor: 'success.main' }}>
+                        <Typography variant="caption" color="success.dark" sx={{ fontWeight: 'bold' }}>
+                          Administrative Hierarchy:
+                        </Typography>
+                        <Box sx={{ mt: 0.5 }}>
+                          {formData.addressComponents.state && (
+                            <Typography variant="caption" display="block" color="success.dark">
+                              <strong>State:</strong> {formData.addressComponents.state}
+                            </Typography>
+                          )}
+                          {formData.addressComponents.district && (
+                            <Typography variant="caption" display="block" color="success.dark">
+                              <strong>District:</strong> {formData.addressComponents.district}
+                            </Typography>
+                          )}
+                          {formData.addressComponents.block && (
+                            <Typography variant="caption" display="block" color="success.dark">
+                              <strong>Block/Area:</strong> {formData.addressComponents.block}
+                            </Typography>
+                          )}
+                          {formData.addressComponents.city && (
+                            <Typography variant="caption" display="block" color="success.dark">
+                              <strong>City:</strong> {formData.addressComponents.city}
+                            </Typography>
+                          )}
+                        </Box>
+                      </Box>
+                    )}
+                  </Box>
+                )}
+              </Box>
             </Grid>
             
             <Grid item xs={12} sm={6}>

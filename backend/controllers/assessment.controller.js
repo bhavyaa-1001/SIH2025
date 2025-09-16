@@ -19,21 +19,66 @@ const MultivariateLinearRegression = require('ml-regression-multivariate-linear'
 // @route   POST /api/assessments
 // @access  Private
 const createAssessment = asyncHandler(async (req, res) => {
-  const { location, roofArea, roofMaterial, soilType, groundwaterLevel } = req.body;
+  const {
+    location,
+    coordinates,
+    addressComponents,
+    propertyType,
+    roofArea,
+    roofMaterial,
+    soilType,
+    annualRainfall,
+    systemType,
+    storageCapacity,
+    filtrationSystem,
+    rechargePit,
+    userContext,
+    groundwaterLevel
+  } = req.body;
 
-  if (!location || !roofArea || !roofMaterial || !soilType) {
+  if (!location || !roofArea || !soilType) {
     res.status(400);
     throw new Error('Please provide all required fields');
   }
 
-  const assessment = await Assessment.create({
+  const assessmentData = {
     user: req.user._id,
     location,
     roofArea,
-    roofMaterial,
     soilType,
-    groundwaterLevel: groundwaterLevel || 'medium',
-  });
+    annualRainfall: annualRainfall || 0,
+    groundwaterLevel: groundwaterLevel || 0,
+    status: 'queued' // Set initial status
+  };
+
+  // Add optional fields if provided
+  if (propertyType) assessmentData.propertyType = propertyType;
+  if (roofMaterial) assessmentData.roofMaterial = roofMaterial;
+  if (systemType) assessmentData.systemType = systemType;
+  if (storageCapacity) assessmentData.storageCapacity = storageCapacity;
+  if (filtrationSystem) assessmentData.filtrationSystem = filtrationSystem;
+  if (rechargePit) assessmentData.rechargePit = rechargePit;
+  if (userContext) assessmentData.userContext = userContext;
+
+  // Add coordinates if provided
+  if (coordinates && coordinates.latitude && coordinates.longitude) {
+    assessmentData.coordinates = {
+      latitude: coordinates.latitude,
+      longitude: coordinates.longitude
+    };
+  }
+
+  // Add address components if provided
+  if (addressComponents) {
+    assessmentData.addressComponents = {
+      state: addressComponents.state || '',
+      district: addressComponents.district || '',
+      block: addressComponents.block || '',
+      city: addressComponents.city || ''
+    };
+  }
+
+  const assessment = await Assessment.create(assessmentData);
 
   if (assessment) {
     res.status(201).json(assessment);
