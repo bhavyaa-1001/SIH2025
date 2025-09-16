@@ -459,7 +459,7 @@ const Assessment = () => {
               />
             </Grid>
             
-            <Grid item xs={12} sm={6}>
+            {/* <Grid item xs={12} sm={6}>
               <FormControl fullWidth required>
                 <InputLabel id="soil-type-label">Soil Type</InputLabel>
                 <Select
@@ -478,9 +478,9 @@ const Assessment = () => {
                 </Select>
                 <FormHelperText>Type of soil at your location</FormHelperText>
               </FormControl>
-            </Grid>
+            </Grid> */}
             
-            <Grid item xs={12}>
+            {/* <Grid item xs={12}>
               <TextField
                 fullWidth
                 label="Annual Rainfall (mm)"
@@ -492,7 +492,7 @@ const Assessment = () => {
                 InputProps={{ inputProps: { min: 0 } }}
                 helperText="Average annual rainfall in your area"
               />
-            </Grid>
+            </Grid> */}
             
             <Grid item xs={12}>
               <Typography variant="subtitle1" gutterBottom>

@@ -5,7 +5,6 @@ import {
   Box,
   Toolbar,
   Typography,
-  Badge,
   Button,
   Menu,
   MenuItem,
@@ -74,47 +73,8 @@ const Navbar = () => {
         </Typography>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Button 
-            color="inherit"
-            aria-label="Search the site"
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                // Add search functionality here
-                console.log('Search button activated via keyboard');
-              }
-            }}
-            onClick={() => {
-              // Add search functionality here
-              console.log('Search button clicked');
-            }}
-          >
-            Search
-          </Button>
-          
           {user && (
             <>
-              <Button 
-                color="inherit"
-                aria-label="View 4 notifications"
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    // Add notifications functionality here
-                    console.log('Notifications button activated via keyboard');
-                  }
-                }}
-                onClick={() => {
-                  // Add notifications functionality here
-                  console.log('Notifications button clicked');
-                }}
-              >
-                <Badge badgeContent={4} color="error">
-                  Notifications
-                </Badge>
-              </Button>
               <Chip
                 label={formatUsername(user)}
                 color="primary"
