@@ -357,7 +357,7 @@ const Assessment = () => {
       });
 
       // Redirect to the static runoff_report.html page instead of the React route
-      window.location.href = `/runoff_report.html?latitude=${formData.coordinates.latitude}&longitude=${formData.coordinates.longitude}`;
+      window.location.href = '/runoff_report.html';
     } catch (err) {
       setError(err.response?.data?.error || 'An error occurred while submitting the assessment to ML models');
     } finally {
@@ -788,7 +788,7 @@ const Assessment = () => {
           <Button
             variant="contained"
             color="primary"
-            onClick = {handleSubmit}
+            onClick={handleSubmit}
             disabled={loading}
             size="large"
             sx={{ minWidth: 200, py: 1.5 }}

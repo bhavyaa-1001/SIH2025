@@ -99,7 +99,6 @@ function App() {
                     <RunoffReport />
                   </ProtectedRoute>
                 } />
-                <Route path="/runoff_report.html" element={<RunoffReport />} />
                 <Route path="/about" element={<About />} />
               </Routes>
             </Suspense>

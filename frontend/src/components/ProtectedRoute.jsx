@@ -3,8 +3,8 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 
 /**
- * ProtectedRoute component to handle authentication
- * Redirects to login page if user is not authenticated
+ * ProtectedRoute component modified to allow public access
+ * No longer redirects to login page if user is not authenticated
  */
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(AuthContext);
@@ -15,12 +15,7 @@ const ProtectedRoute = ({ children }) => {
     return <div className="loading">Loading...</div>;
   }
 
-  // If not authenticated, redirect to login with return path
-  if (!user) {
-    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
-  }
-
-  // If authenticated, render the protected component
+  // Allow access to all users, whether authenticated or not
   return children;
 };
 
